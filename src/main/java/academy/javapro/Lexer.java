@@ -4,15 +4,17 @@ import java.util.*;
 import java.util.regex.*;
 
 public class Lexer {
+    // Patterns to recognize different token types
     private static final Pattern[] PATTERNS = {
-            Pattern.compile("\\s+"),                                       // whitespace
-            Pattern.compile("\\b(if|else|for|while|int|float|String)\\b"), // keywords
-            Pattern.compile("\\b\\d+(\\.\\d+)?\\b"),                      // literals
-            Pattern.compile("==|<=|>=|!=|&&|\\|\\||[+\\-*/=<>!]"),        // operators
-            Pattern.compile("[;,.(){}\\[\\]]"),                           // punctuation
-            Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")               // identifiers
+            Pattern.compile("\\s+"),                                     // Whitespace
+            Pattern.compile("\\b(if|else|for|while|int|float|String)\\b"), // Keywords
+            Pattern.compile("\\b\\d+(\\.\\d+)?\\b"),                    // Numeric literals
+            Pattern.compile("==|<=|>=|!=|&&|\\|\\||[+\\-*/=<>!]"),       // Operators
+            Pattern.compile("[;,.(){}\\[\\]]"),                         // Punctuation
+            Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")             // Identifiers
     };
 
+    // Corresponding types
     private static final String[] TYPES = {
             "WHITESPACE",
             "KEYWORD",
@@ -27,49 +29,56 @@ public class Lexer {
     private int position;
 
     /**
-     * TODO: Initialize the lexer with the input string
-     * 1. Store the input string in the 'input' field
-     * 2. Initialize the tokens list as a new ArrayList
-     * 3. Set the initial position to 0
-     *
-     * @param input The source code string to be tokenized
+     * Constructor stores input string, initializes the token list, 
+     * and sets position to start
      */
     public Lexer(String input) {
-        // Your code here
+        this.input = input;
+        this.tokens = new ArrayList<>();
+        this.position = 0;
     }
 
     /**
-     * TODO: Process the input string and break it into tokens
-     * Steps to implement:
-     * 1. Create a while loop that continues while position < input.length()
-     * 2. Get the remaining input using substring(position)
-     * 3. Try to match each pattern in PATTERNS array:
-     *    - Create a matcher using pattern.matcher(remainingInput)
-     *    - Use matcher.lookingAt() to check if it matches at current position
-     *    - If match found:
-     *      a. Get the matched text using matcher.group()
-     *      b. If not whitespace, add new token to tokens list
-     *      c. Update position by adding length of matched text
-     * 4. If no pattern matches, throw RuntimeException for invalid input
+     * Reads input from the current position, attempts to match 
+     * against each pattern. If matched, adds token 
+     * and moves up the position. Otherwise, throws error for invalid input.
      */
     public void tokenize() {
-        // Your code here
+        while (position < input.length()) {
+            String remaining = input.substring(position);
+            boolean foundMatch = false;
+
+            for (int i = 0; i < PATTERNS.length; i++) {
+                Matcher matcher = PATTERNS[i].matcher(remaining);
+                if (matcher.lookingAt()) {
+                    String matchedText = matcher.group();
+
+                    // Skip whitespace token
+                    if (i != 0) {
+                        tokens.add(new String[]{TYPES[i], matchedText});
+                    }
+
+                    position += matchedText.length();
+                    foundMatch = true;
+                    break;
+                }
+            }
+
+            if (!foundMatch) {
+                throw new RuntimeException("Invalid token at position " 
+                    + position + ": '" + remaining.charAt(0) + "'");
+            }
+        }
     }
 
-    /**
-     * TODO: Return the list of tokens
-     * 1. Return the tokens list containing all found tokens
-     * 2. Each token should be a String array with two elements:
-     *    - First element: Token type (from TYPES array)
-     *    - Second element: Token value (the actual text)
-     *
-     * @return List<String [ ]> The list of tokens
-     */
+    
+      // Returns list of tokens, each represented as a two element array
+     
     public List<String[]> getTokens() {
-        // Your code here
-        return null;
+        return tokens;
     }
 
+    // test in main
     public static void main(String[] args) {
         String code = "int x = 10; if (x > 5) { x = x + 1; }";
         Lexer lexer = new Lexer(code);
@@ -79,3 +88,4 @@ public class Lexer {
         }
     }
 }
+
